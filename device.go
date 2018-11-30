@@ -597,6 +597,44 @@ func (d *Device) SetLineProperties2(bits DataBits, stopbits StopBits, parity Par
 	return d.makeError(e)
 }
 
+const (
+	// Bits 0 through 3 are zeros
+
+	// ModemStatusMaskCTS indicates clear to send (0 = inactive 1 = active)
+	ModemStatusMaskCTS uint16 = 1 << (iota + 4)
+	// ModemStatusMaskDTS indicates data set ready (0 = inactive 1 = active)
+	ModemStatusMaskDTS
+	// ModemStatusMaskRI indicates ring indicator (0 = inactive 1 = active)
+	ModemStatusMaskRI
+	// ModemStatusMaskRLSD indicates receive line signal detect
+	// (0 = inactive 1 = active)
+	ModemStatusMaskRLSD
+	// ModemStatusMaskDR indicates data ready
+	ModemStatusMaskDR
+	// ModemStatusMaskOE indicates overrun error
+	ModemStatusMaskOE
+	// ModemStatusMaskPE indicates parity error
+	ModemStatusMaskPE
+	// ModemStatusMaskFE indicates framing error
+	ModemStatusMaskFE
+	// ModemStatusMaskBI indicates break interrupt
+	ModemStatusMaskBI
+	// ModemStatusMaskTHRE indicates transmitter holding register
+	ModemStatusMaskTHRE
+	// ModemStatusMaskTEMT indicates transmitter empty
+	ModemStatusMaskTEMT
+	// ModemStatusMaskRCVRFIFOError indicates an error in RCVR FIFO
+	ModemStatusMaskRCVRFIFOError
+)
+
+// PollModemStatus polls for the two byte modem status.
+// Use ModemStatusMasks to check each flag.
+func (d *Device) PollModemStatus() (uint16, error) {
+	var status uint16
+	e := C.ftdi_poll_modem_status(d.ctx, (*C.ushort)(&status))
+	return status, d.makeError(e)
+}
+
 // SetFlowControl sets the flow control parameter
 func (d *Device) SetFlowControl(flowctrl int) error {
 	return d.makeError(C.ftdi_setflowctrl(d.ctx, C.int(flowctrl)))
